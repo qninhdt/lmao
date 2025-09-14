@@ -1,0 +1,10 @@
+{
+  "add_config_files": ["./volume_pairlists.json"],
+  "pairlists": [
+    {
+      "method": "VolumePairList",
+      "number_assets": 200,
+      "sort_key": "quoteVolume"
+    }
+  ]
+}

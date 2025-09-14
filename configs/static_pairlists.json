@@ -1,0 +1,8 @@
+{
+  "add_config_files": ["./static_pairlists.json"],
+  "pairlists": [
+    {
+      "method": "StaticPairList"
+    }
+  ]
+}
