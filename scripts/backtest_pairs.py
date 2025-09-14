@@ -5,12 +5,14 @@ import re
 import zipfile
 import shutil
 from pathlib import Path
+from freqtrade.configuration.load_config import load_from_files
 import pandas as pd
+import freqtrade
 
 # --- Configuration ---
 STRATEGY_NAME = "E0V1E"
 TIMERANGE = "20250101-20250630"
-CONFIG_PATH = Path("user_data/config.json")
+CONFIG_PATH = Path("configs/volume_pairlists.json")
 BACKTEST_RESULTS_DIR = Path("user_data/backtest_results/pairs_analysis/")
 CSV_OUTPUT_PATH = Path("./pair_performance.csv")
 
@@ -46,7 +48,13 @@ def get_all_pairs() -> list[str]:
     """Get list of all available trading pairs."""
     print("📢 Getting list of all trading pairs...")
     try:
-        command = ["freqtrade", "test-pairlist", "--print-json"]
+        command = [
+            "freqtrade",
+            "test-pairlist",
+            "--print-json",
+            "--config",
+            str(CONFIG_PATH),
+        ]
         # Hide subprocess output for cleaner interface
         result = subprocess.run(
             command, capture_output=True, text=True, check=True, encoding="utf-8"
@@ -248,7 +256,7 @@ def main():
     temp_config_path = CONFIG_PATH.with_suffix(".tmp.json")
     try:
         with open(CONFIG_PATH, "r") as f:
-            config_data = json.loads(remove_json_comments(f.read()))
+            config_data = load_from_files([CONFIG_PATH])
 
         config_data["pairlists"] = [{"method": "StaticPairList"}]
         config_data["max_open_trades"] = 1

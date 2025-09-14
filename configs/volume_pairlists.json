@@ -1,5 +1,5 @@
 {
-  "add_config_files": ["./volume_pairlists.json"],
+  "add_config_files": ["./base.json"],
   "pairlists": [
     {
       "method": "VolumePairList",
