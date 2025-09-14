@@ -224,5 +224,5 @@ __marimo__/
 .~lock.*
 
 # temp
-config.tmp.json
+*.tmp.json
 pair_performance.csv
