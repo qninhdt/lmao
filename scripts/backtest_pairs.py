@@ -13,7 +13,7 @@ from pycoingecko import CoinGeckoAPI
 
 # --- Configuration ---
 STRATEGY_NAME = "E0V1E"
-TIMERANGE = "20250101-20250630"
+TIMERANGE = "20250501-20250901"
 CONFIG_PATH = Path("configs/volume_pairlists.json")
 BACKTEST_RESULTS_DIR = Path("user_data/backtest_results/pairs_analysis/")
 CSV_OUTPUT_PATH = Path("./pair_performance.csv")
@@ -261,14 +261,14 @@ def process_and_save_stats(zip_file_path: Path):
         {},
     )
     total_trades = pair_specific_stats.get("trades", 0)
-    coin_data = get_coin_data(pair_specific_stats.get("key"))
+    # coin_data = get_coin_data(pair_specific_stats.get("key"))
 
     pair_data = {
         "pair": pair_specific_stats.get("key"),
-        "coin_price": coin_data.get("price") if coin_data else "no data",
-        "coin_market_cap": coin_data.get("market_cap") if coin_data else "no data",
-        "coin_volume_24h": coin_data.get("volume_24h") if coin_data else "no data",
-        "cap_size": coin_data.get("cap_size") if coin_data else "no data",
+        # "coin_price": coin_data.get("price") if coin_data else "no data",
+        # "coin_market_cap": coin_data.get("market_cap") if coin_data else "no data",
+        # "coin_volume_24h": coin_data.get("volume_24h") if coin_data else "no data",
+        # "cap_size": coin_data.get("cap_size") if coin_data else "no data",
         "total_profit_pct": round(pair_specific_stats.get("profit_total_pct", 0.0), 2),
         "profit_total_abs": round(strategy_stats.get("profit_total_abs", 0.0), 3),
         "market_change_pct": round(strategy_stats.get("market_change", 0.0) * 100, 2),
@@ -330,7 +330,7 @@ def main():
     """Main function to run the entire process."""
     BACKTEST_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    pairs_to_test = get_all_pairs()[155:]
+    pairs_to_test = get_all_pairs()
     if not pairs_to_test:
         print("No trading pairs found. Exiting.")
         return
