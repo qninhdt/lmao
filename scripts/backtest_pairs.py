@@ -13,7 +13,7 @@ from pycoingecko import CoinGeckoAPI
 
 # --- Configuration ---
 STRATEGY_NAME = "E0V1E"
-TIMERANGE = "20250501-20250901"
+TIMERANGE = "20250501-20250801"
 CONFIG_PATH = Path("configs/volume_pairlists.json")
 BACKTEST_RESULTS_DIR = Path("user_data/backtest_results/pairs_analysis/")
 CSV_OUTPUT_PATH = Path("./pair_performance.csv")
