@@ -1,5 +1,29 @@
 {
   "add_config_files": ["./base.json"],
+  "exchange": {
+    "pair_whitelist": [
+      "VOXEL/USDT",
+      "KAITO/USDT",
+      "ACH/USDT",
+      "MAGIC/USDT",
+      "FUN/USDT",
+      "OG/USDT",
+      "FIDA/USDT",
+      "RED/USDT",
+      "FORM/USDT",
+      "REZ/USDT",
+      "PIXEL/USDT",
+      "THE/USDT",
+      "D/USDT",
+      "RAY/USDT",
+      "API3/USDT",
+      "BABY/USDT",
+      "TURBO/USDT",
+      "INIT/USDT",
+      "CAKE/USDT"
+      // "LISTA/USDT"
+    ]
+  },
   "pairlists": [
     {
       "method": "StaticPairList"

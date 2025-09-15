@@ -95,7 +95,7 @@
     "balance_dust_level": 0.01
   },
   "api_server": {
-    "enabled": false,
+    "enabled": true,
     "listen_ip_address": "127.0.0.1",
     "listen_port": 8080,
     "verbosity": "info",

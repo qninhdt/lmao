@@ -52,7 +52,6 @@ class E0V1E(IStrategy):
 
     @property
     def protections(self):
-
         return [{"method": "CooldownPeriod", "stop_duration_candles": 96}]
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
