@@ -1,7 +1,6 @@
 {
   "add_config_files": ["./base.json"],
   "trading_mode": "futures",
-  "max_open_trades": 2,
   "margin_mode": "isolated",
   "exchange": {
     "pair_whitelist": [
