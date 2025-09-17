@@ -227,3 +227,4 @@ __marimo__/
 *.tmp.json
 pair_performance.csv
 ml_models
+optuna_studies

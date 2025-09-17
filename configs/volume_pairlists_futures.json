@@ -2,17 +2,12 @@
   "add_config_files": ["./base.json"],
   "trading_mode": "futures",
   "margin_mode": "isolated",
-  "timeframe": "15m",
   "pairlists": [
     {
       "method": "VolumePairList",
       "number_assets": 100,
       "sort_key": "quoteVolume",
-      "refresh_period": 1800
-    },
-    {
-      "method": "ShuffleFilter",
-      "seed": 42
+      "refresh_period": 3600
     }
   ]
 }

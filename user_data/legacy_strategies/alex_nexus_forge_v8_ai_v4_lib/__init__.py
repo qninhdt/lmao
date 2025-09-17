@@ -41,7 +41,7 @@ class AlexNexusForgeV8AIV4(IStrategy):
         True  # Ensure trailing only starts after offset is reached
     )
     use_custom_stoploss = True
-    can_short = True
+    can_short = False
     use_exit_signal = True
     ignore_roi_if_entry_signal = (
         False  # CHANGED: Allow ROI to work even with entry signals

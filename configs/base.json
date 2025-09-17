@@ -1,11 +1,11 @@
 {
-  "max_open_trades": 3,
+  "max_open_trades": 5,
   "stake_currency": "USDT",
   "stake_amount": "unlimited",
   "tradable_balance_ratio": 0.99,
   "fiat_display_currency": "USD",
   "dry_run": true,
-  "dry_run_wallet": 20,
+  "dry_run_wallet": 100,
   "cancel_open_orders_on_exit": false,
   "use_exit_signal": true,
   "exit_profit_only": false,
@@ -96,7 +96,7 @@
   "api_server": {
     "enabled": true,
     "listen_ip_address": "0.0.0.0",
-    "listen_port": 8080,
+    "listen_port": 8081,
     "verbosity": "info",
     "jwt_secret_key": "somethingrandom",
     "CORS_origins": [],
