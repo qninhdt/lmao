@@ -3643,7 +3643,7 @@ def calculate_advanced_entry_signals(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
-class AlexNexusForgeV8AIV4(IStrategy):
+class AlexNexusForgeV8AIV4_SPOT(IStrategy):
     # General strategy parameters
     timeframe = "1h"
     startup_candle_count: int = 1000

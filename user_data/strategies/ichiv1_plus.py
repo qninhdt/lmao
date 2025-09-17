@@ -27,21 +27,21 @@ class ichiV1_plus(IStrategy):
     }
 
     # Sell hyperspace params:
-    # 增强的卖出参数配置
+    # Enhanced sell parameter configuration
     sell_params = {
-        # 基础趋势指标
+        # Basic trend indicators
         "sell_trend_indicator": "trend_close_2h",
         "sell_short_trend": "trend_close_5m",
-        # 震荡市场过滤参数
-        "adx_threshold": 25,  # ADX阈值，低于此值视为震荡市场
-        "bb_width_percentile": 30,  # 布林带宽度百分位数阈值
-        # 确认指标阈值
-        "rsi_overbought": 70,  # RSI超买阈值
-        "volume_confirmation": 1.2,  # 成交量确认倍数
-        "trend_consistency_min": 0.3,  # 趋势一致性最小值
-        # 分级卖出阈值
-        "partial_sell_ratio": 0.4,  # 部分卖出比例
-        "strong_sell_confirmation": 3,  # 强卖出信号确认数量
+        # Ranging market filter parameters
+        "adx_threshold": 25,  # ADX threshold, below this value is considered ranging market
+        "bb_width_percentile": 30,  # Bollinger band width percentile threshold
+        # Confirmation indicator thresholds
+        "rsi_overbought": 70,  # RSI overbought threshold
+        "volume_confirmation": 1.2,  # Volume confirmation multiplier
+        "trend_consistency_min": 0.3,  # Minimum trend consistency value
+        # Tiered sell thresholds
+        "partial_sell_ratio": 0.4,  # Partial sell ratio
+        "strong_sell_confirmation": 3,  # Strong sell signal confirmation count
     }
 
     # ROI table:
@@ -53,10 +53,10 @@ class ichiV1_plus(IStrategy):
     # }
 
     minimal_roi = {
-        "0": 0.03,  # 开仓就拉升，3% 止盈
-        "60": 0.02,  # 1 小时后，2% 就能走
-        "240": 0.01,  # 4 小时后，1% 就能走
-        "720": 0,  # 12 小时后，保本退出
+        "0": 0.03,  # Immediate pump, 3% take profit
+        "60": 0.02,  # After 1 hour, 2% can exit
+        "240": 0.01,  # After 4 hours, 1% can exit
+        "720": 0,  # After 12 hours, breakeven exit
     }
 
     # Stoploss:
@@ -103,7 +103,7 @@ class ichiV1_plus(IStrategy):
         },
     }
 
-    # 固定杠杆模式：直接使用常量倍数
+    # Fixed leverage mode: directly use constant multiplier
     fixed_leverage: float = 2.0
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -139,12 +139,12 @@ class ichiV1_plus(IStrategy):
             "fan_magnitude"
         ].shift(1)
 
-        # 震荡市场识别指标
+        # Ranging market identification indicators
         dataframe["adx"] = ta.ADX(dataframe)
         dataframe["atr"] = ta.ATR(dataframe)
         dataframe["atr_pct"] = (dataframe["atr"] / dataframe["close"]) * 100
 
-        # 布林带用于波动性分析
+        # Bollinger bands for volatility analysis
         bollinger = qtpylib.bollinger_bands(dataframe["close"], window=20, stds=2)
         dataframe["bb_upper"] = bollinger["upper"]
         dataframe["bb_lower"] = bollinger["lower"]
@@ -152,7 +152,7 @@ class ichiV1_plus(IStrategy):
             (dataframe["bb_upper"] - dataframe["bb_lower"]) / dataframe["close"]
         ) * 100
 
-        # 趋势一致性评分 (多时间框架趋势方向一致性)
+        # Trend consistency score (multi-timeframe trend direction consistency)
         trend_directions = []
         timeframes = ["5m", "15m", "30m", "1h", "2h", "4h"]
         for tf in timeframes:
@@ -169,14 +169,14 @@ class ichiV1_plus(IStrategy):
         else:
             dataframe["trend_consistency"] = 0.5
 
-        # RSI用于超买确认
+        # RSI for overbought confirmation
         dataframe["rsi"] = ta.RSI(dataframe)
 
-        # 成交量相关指标
+        # Volume related indicators
         dataframe["volume_sma"] = ta.SMA(dataframe["volume"], timeperiod=20)
         dataframe["volume_ratio"] = dataframe["volume"] / dataframe["volume_sma"]
 
-        # 震荡市场标识 (ADX < 25 且 BB宽度较小)
+        # Ranging market identification (ADX < 25 and small BB width)
         dataframe["is_ranging"] = (dataframe["adx"] < 25) & (
             dataframe["bb_width"] < dataframe["bb_width"].rolling(50).quantile(0.3)
         )
@@ -287,54 +287,54 @@ class ichiV1_plus(IStrategy):
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
 
-        # 初始化卖出信号列
+        # Initialize sell signal column
         dataframe["sell"] = 0.0
 
-        # ============ 基础趋势穿越条件 ============
+        # ============ Basic trend crossover conditions ============
         basic_sell_signal = qtpylib.crossed_below(
             dataframe[self.sell_params["sell_short_trend"]],
             dataframe[self.sell_params["sell_trend_indicator"]],
         )
 
-        # ============ 确认指标收集 ============
+        # ============ Confirmation indicators collection ============
         confirmations = []
 
-        # 1. RSI超买确认
+        # 1. RSI overbought confirmation
         rsi_confirmation = dataframe["rsi"] > self.sell_params["rsi_overbought"]
         confirmations.append(rsi_confirmation)
 
-        # 2. 成交量确认（放量下跌）
+        # 2. Volume confirmation (volume decline)
         volume_confirmation = (
             dataframe["volume_ratio"] > self.sell_params["volume_confirmation"]
         )
         confirmations.append(volume_confirmation)
 
-        # 3. 一目均衡表确认（价格跌破转换线）
+        # 3. Ichimoku confirmation (price breaks below conversion line)
         ichimoku_confirmation = dataframe["close"] < dataframe["tenkan_sen"]
         confirmations.append(ichimoku_confirmation)
 
-        # 4. 趋势一致性恶化确认
+        # 4. Trend consistency deterioration confirmation
         trend_deterioration = (
             dataframe["trend_consistency"] < self.sell_params["trend_consistency_min"]
         )
         confirmations.append(trend_deterioration)
 
-        # 5. 云图跌破确认
+        # 5. Cloud break confirmation
         cloud_break = (dataframe["close"] < dataframe["senkou_a"]) & (
             dataframe["close"] < dataframe["senkou_b"]
         )
         confirmations.append(cloud_break)
 
-        # 计算确认信号数量
+        # Calculate confirmation signal count
         confirmation_count = sum([conf.astype(int) for conf in confirmations])
 
-        # ============ 震荡市场保护机制 ============
-        # 在震荡市场中提高卖出门槛，减少频繁交易
+        # ============ Ranging market protection mechanism ============
+        # Increase sell threshold in ranging markets to reduce frequent trading
         ranging_market = dataframe["is_ranging"]
 
-        # ============ 分级卖出逻辑 ============
+        # ============ Tiered sell logic ============
 
-        # 部分卖出条件（震荡市场中只进行部分卖出）
+        # Partial sell conditions (only partial sell in ranging markets)
         partial_sell_conditions = (
             basic_sell_signal
             & (confirmation_count >= 1)
@@ -342,58 +342,60 @@ class ichiV1_plus(IStrategy):
             & (dataframe["adx"] < self.sell_params["adx_threshold"])
         )
 
-        # 强势卖出条件（趋势市场或多重确认）
+        # Strong sell conditions (trending market or multiple confirmations)
         strong_sell_conditions = basic_sell_signal & (
-            # 趋势市场中的确认卖出
+            # Confirmed sell in trending market
             ((~ranging_market) & (confirmation_count >= 2))
             |
-            # 或者多重确认的强势卖出
+            # Or strong sell with multiple confirmations
             (confirmation_count >= self.sell_params["strong_sell_confirmation"])
         )
 
-        # 紧急卖出条件（多重负面信号同时出现）
+        # Emergency sell conditions (multiple negative signals appearing simultaneously)
         emergency_sell_conditions = (
             basic_sell_signal
             & (confirmation_count >= 4)
-            & (dataframe["rsi"] > 75)  # 严重超买
+            & (dataframe["rsi"] > 75)  # Severely overbought
             & cloud_break
-            & (dataframe["close"] < dataframe["bb_lower"])  # 跌破布林带下轨
+            & (
+                dataframe["close"] < dataframe["bb_lower"]
+            )  # Break below Bollinger lower band
         )
 
-        # ============ 应用卖出信号 ============
+        # ============ Apply sell signals ============
 
-        # 部分卖出（40%仓位）
+        # Partial sell (40% position)
         dataframe.loc[partial_sell_conditions, "sell"] = self.sell_params[
             "partial_sell_ratio"
         ]
 
-        # 强势卖出（70%仓位）
+        # Strong sell (70% position)
         dataframe.loc[strong_sell_conditions, "sell"] = 0.7
 
-        # 紧急全部卖出（100%仓位）
+        # Emergency full sell (100% position)
         dataframe.loc[emergency_sell_conditions, "sell"] = 1.0
 
-        # ============ 额外的市场环境适应性调整 ============
+        # ============ Additional market environment adaptability adjustments ============
 
-        # 如果扇形幅度急剧恶化，增强卖出信号
+        # If fan magnitude deteriorates sharply, enhance sell signal
         fan_deterioration = (
             dataframe["fan_magnitude"] < 0.98
-        ) & (  # 短期趋势弱于长期趋势
+        ) & (  # Short-term trend weaker than long-term trend
             dataframe["fan_magnitude_gain"] < 0.995
-        )  # 且持续恶化
+        )  # And continues to deteriorate
 
-        # 扇形恶化时的额外卖出
+        # Additional sell when fan deteriorates
         fan_sell_conditions = (
             basic_sell_signal & fan_deterioration & (confirmation_count >= 1)
         )
         dataframe.loc[fan_sell_conditions, "sell"] = np.maximum(
-            dataframe["sell"], 0.6  # 至少卖出60%
+            dataframe["sell"], 0.6  # Sell at least 60%
         )
 
         return dataframe
 
     # =============================================================
-    # 固定杠杆：仅返回设定或配置覆盖的 fixed_leverage
+    # Fixed leverage: only return set or config-overridden fixed_leverage
     # -------------------------------------------------------------
     def leverage(
         self,

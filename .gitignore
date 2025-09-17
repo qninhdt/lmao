@@ -226,3 +226,4 @@ __marimo__/
 # temp
 *.tmp.json
 pair_performance.csv
+ml_models

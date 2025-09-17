@@ -6,14 +6,15 @@
     "pair_whitelist": [
       // "ETH/USDT:USDT",
       // "BTC/USDT:USDT",
-      // "SOL/USDT:USDT",
-      // "DOGE/USDT:USDT",
-      // "XRP/USDT:USDT",
+      "SOL/USDT:USDT",
+      "LINK/USDT:USDT",
+      "XRP/USDT:USDT"
       // "PUMP/USDT:USDT",
       // "ENA/USDT:USDT",
       // "AVAX/USDT:USDT",
-      "MERL/USDT:USDT",
-      "LA/USDT:USDT"
+      // "MERL/USDT:USDT",
+      // "MOODENG/USDT:USDT",
+      // "BABY/USDT:USDT"
       // "HIFI/USDT:USDT",
       // "SUI/USDT:USDT",
       // "1000PEPE/USDT:USDT",
