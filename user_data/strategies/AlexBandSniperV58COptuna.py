@@ -459,7 +459,7 @@ class PlotConfig:
         return self
 
 
-class AlexBandSniperV58CO(
+class AlexBandSniperV58COptuna(
     IStrategy
 ):  # CHANGED: Klassenname von AlexBandSniperV51C zu AlexBandSniperV51COptuna
     """
@@ -2316,7 +2316,7 @@ class AlexBandSniperV58CO(
         except:
             pass
 
-        # TODO: Remove this
+        # TODO: Remove this strict
         return min(value, 4)
 
     def custom_stoploss(
