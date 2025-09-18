@@ -2304,20 +2304,19 @@ class AlexBandSniperV58COptuna(
 
                 # Reduce leverage for weaker signals
                 if current_signal_strength >= 8:
-                    value = self.leverage_value  # Full leverage for strong signals
+                    return self.leverage_value  # Full leverage for strong signals
                 elif current_signal_strength >= 6:
-                    value = self.leverage_value * 0.8  # 80% leverage
+                    return self.leverage_value * 0.8  # 80% leverage
                 elif current_signal_strength >= 4:
-                    value = self.leverage_value * 0.6  # 60% leverage
+                    return self.leverage_value * 0.6  # 60% leverage
                 else:
-                    value = self.leverage_value * 0.4  # 40% leverage for weak signals
+                    return self.leverage_value * 0.4  # 40% leverage for weak signals
             else:
-                value = self.leverage_value * 0.5  # Default to 50% leverage if no data
+                return self.leverage_value * 0.5  # Default to 50% leverage if no data
         except:
             pass
 
-        # TODO: Remove this strict
-        return min(value, 4)
+        return self.leverage_value * 0.5  # Fallback to 50% leverage on error
 
     def custom_stoploss(
         self,
