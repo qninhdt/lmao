@@ -5,11 +5,24 @@
   "timeframe": "15m",
   "pairlists": [
     {
-      "method": "VolumePairList",
-      "number_assets": 150,
-      "sort_key": "quoteVolume"
+      "method": "MarketCapPairList",
+      "number_assets": 200,
+      "max_rank": 200,
+      "refresh_period": 86400
     },
-    { "method": "AgeFilter", "min_days_listed": 365 },
-    { "method": "ShuffleFilter", "seed": 42 }
+    {
+      "method": "VolumePairList",
+      "number_assets": 100,
+      "sort_key": "quoteVolume",
+      "refresh_period": 1800
+    },
+    {
+      "method": "AgeFilter",
+      "min_days_listed": 30
+    },
+    {
+      "method": "ShuffleFilter",
+      "seed": 24
+    }
   ]
 }
