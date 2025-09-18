@@ -3,7 +3,7 @@
   "pairlists": [
     {
       "method": "VolumePairList",
-      "number_assets": 110,
+      "number_assets": 100,
       "sort_key": "quoteVolume"
     }
   ]
