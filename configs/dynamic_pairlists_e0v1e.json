@@ -5,8 +5,8 @@
   "pairlists": [
     {
       "method": "MarketCapPairList",
-      "number_assets": 200,
-      "max_rank": 200,
+      "number_assets": 300,
+      "max_rank": 300,
       "sort_key": "market_cap",
       "refresh_period": 86400
     },
