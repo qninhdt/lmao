@@ -9,13 +9,13 @@
       "number_assets": 100,
       "sort_key": "quoteVolume"
     },
-    {
-      "method": "AgeFilter",
-      "min_days_listed": 180
-    },
+    // {
+    //   "method": "AgeFilter",
+    //   "min_days_listed": 180
+    // },
     {
       "method": "ShuffleFilter",
-      "seed": 42
+      "seed": 24
     }
   ]
 }
