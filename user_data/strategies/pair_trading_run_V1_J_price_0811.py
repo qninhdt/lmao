@@ -105,7 +105,7 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
                 # Filter based on z_cross_zero_count value
                 if (
                     z_cross_zero_count_value is not None
-                    and z_cross_zero_count_value >= 400
+                    and z_cross_zero_count_value >= 200
                 ):
                     z_cross_zero_count_filtered[p_key] = pvalue
 
