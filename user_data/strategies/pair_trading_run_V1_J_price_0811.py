@@ -13,8 +13,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-DRY_RUN_WALLET_USDT = 90
-
 
 class pair_trading_run_V1_J_price_0811(IStrategy):
     can_short = True
@@ -49,8 +47,6 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
 
     def __init__(self, config):
         super().__init__(config)
-        self.free_usdt = 0
-        # self.free_usdt = 0.5 * self.free_usdt  # Assume 60% of USDT is available
         self.whitelist = config.get("exchange", {}).get("pair_whitelist", [])
         self.pvalue_dict = config.get("pvalue_dict", {})
         self.gamma_dict = config.get("gamma_dict", {})
@@ -68,7 +64,7 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
         self.pair_states = {}
         ### Modification: Add a timer to update pair pool every 4 hours
         self.last_update_time = datetime(1945, 8, 15, tzinfo=timezone.utc)
-        self.update_interval = timedelta(days=30)
+        self.update_interval = timedelta(days=1)
 
     def _initialize_all_candidates(self) -> list:
         logger.info(len(self.pair_states))
@@ -152,7 +148,6 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
                 half_life_value = self.half_life_dict.get(half_life_key)
 
                 # Filter based on half_life value
-                # if half_life_value is not None and half_life_value < DRY_RUN_WALLET_USDT:
                 if half_life_value is not None and half_life_value < 700:
                     half_life_filtered[p_key] = pvalue
 
@@ -167,6 +162,7 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
         )
 
         candidates = []
+        max_pairs = self.config.get("max_open_trades", 1) / 2
         for p_key, pvalue in half_life_filtered.items():
             try:
                 a_key, b_key = p_key.replace("_pvalue", "").split("_")
@@ -197,8 +193,14 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
                 if (gamma + 1) <= 0:
                     continue  # Avoid division by zero or negative numbers
 
-                target_stake_B = self.free_usdt / (gamma + 1)
-                target_stake_A = self.free_usdt - target_stake_B
+                target_stake_B = (
+                    self.wallets.get_total(self.stake_currency)
+                    / max_pairs
+                    / (gamma + 1)
+                )
+                target_stake_A = (
+                    self.wallets.get_total(self.stake_currency) - target_stake_B
+                )
 
                 # 3. Check if position value meets minimum requirements (independent of leverage!)
                 if target_stake_A < MIN_STAKE_USDT or target_stake_B < MIN_STAKE_USDT:
@@ -325,8 +327,9 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
         )
 
         if len(self.tradable_pairs) > 0:
-            capital_per_pair = self.free_usdt / len(self.tradable_pairs)
-            # capital_per_pair = self.free_usdt / 6
+            capital_per_pair = self.wallets.get_total(self.stake_currency) / len(
+                self.tradable_pairs
+            )
             self.stake_allocations = {
                 key: capital_per_pair for key in self.tradable_pairs
             }
@@ -344,7 +347,7 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
         current_time = dataframe.iloc[-1]["date"].to_pydatetime()
         if current_time >= self.last_update_time + self.update_interval:
             # self.free_usdt = 0.6 * self.wallets.get_total("USDT")
-            self.free_usdt = 0.6 * DRY_RUN_WALLET_USDT
+            # self.free_usdt = self.wallets.get_total(self.stake_currency)
             self.all_candidate_pairs = self._initialize_all_candidates()
             self._update_tradable_pairs()
             self.last_update_time = current_time
@@ -479,7 +482,8 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
                 # Check if profit is greater than 0
                 # pair_profit_ratio = (profit_A + profit_B) / ((0.6 * self.wallets.get_total('USDT')) / 6)
                 pair_profit_ratio = (profit_A + profit_B) / (
-                    0.6 * DRY_RUN_WALLET_USDT / 6
+                    self.wallets.get_total(self.stake_currency)
+                    / len(self.tradable_pairs)
                 )
                 # profit_condition = pair_profit_ratio > 0
 
@@ -500,16 +504,6 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
         current_profit: float,
         **kwargs,
     ):
-        # logger.info(f"--- [custom_exit] for {pair} at {current_time} ---")
-        if current_time >= self.last_update_time + self.update_interval:
-            # self.free_usdt = 0.6 * self.wallets.get_total('USDT')
-            self.free_usdt = 0.6 * DRY_RUN_WALLET_USDT
-            # self.all_candidate_pairs = self._initialize_all_candidates()
-            # self._update_tradable_pairs()
-            # self.last_update_time = current_time
-            # logger.info(
-            #    f"+++++++++++++++++++++++Updated tradable pairs at custom_exit time {current_time},last_update_time: {self.last_update_time}+++++++++++++++++++++++ ")
-
         open_trades = Trade.get_trades_proxy(is_open=True)
         all_profits = {}
         total_profit_amount = 0.0
@@ -538,8 +532,7 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
             all_profits[open_trade.pair] = (
                 f"{profit_pct:.2f}% ({profit_amount:.2f} {open_trade.stake_currency})"
             )
-        # ratio = total_profit_amount / self.wallets.get_total('USDT')
-        ratio = total_profit_amount / DRY_RUN_WALLET_USDT
+        ratio = total_profit_amount / self.wallets.get_total("USDT")
         # logger.info(f"log_____total_profit_amount:{total_profit_amount},ratio:{ratio}")
         if ratio <= -1:
             logger.info(
@@ -583,8 +576,10 @@ class pair_trading_run_V1_J_price_0811(IStrategy):
             # Update floating profit
             profit_A = self.get_trade_profit(trade_A) if trade_A else 0.0
             profit_B = self.get_trade_profit(trade_B) if trade_B else 0.0
-            # pair_profit_ratio = (profit_A + profit_B) / ((0.6 * self.wallets.get_total('USDT')) / len(self.tradable_pairs))
-            pair_profit_ratio = (profit_A + profit_B) / (0.6 * DRY_RUN_WALLET_USDT / 6)
+            pair_profit_ratio = (profit_A + profit_B) / (
+                (self.wallets.get_total("USDT")) / len(self.tradable_pairs)
+            )
+            # pair_profit_ratio = (profit_A + profit_B) / ( self.wallets.get_total('USDT') / 6)
             state = self.pair_states.get(pair_key)
 
             # logger.info(f"Pair {pair_key} profit ratio: {pair_profit_ratio:.2%} (A: {profit_A:.2f}, B: {profit_B:.2f})")
