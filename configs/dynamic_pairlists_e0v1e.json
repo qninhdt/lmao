@@ -4,19 +4,8 @@
   "max_open_trades": 5,
   "pairlists": [
     {
-      "method": "MarketCapPairList",
-      "number_assets": 300,
-      "max_rank": 300,
-      "sort_key": "market_cap",
-      "refresh_period": 86400
-    },
-    {
-      "method": "AgeFilter",
-      "min_days_listed": 30
-    },
-    {
       "method": "VolumePairList",
-      "number_assets": 100,
+      "number_assets": 150,
       "sort_key": "quoteVolume"
     }
   ]
